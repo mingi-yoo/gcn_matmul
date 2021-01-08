@@ -26,6 +26,9 @@ int main(int argc, char** argv) {
 	ofstream xw_file("xw_matrix.txt");
 	ofstream axw_file("axw_matrix.txt");
 
+	// for time measurement
+	time_t start, end;
+
 	if (ini_file.is_open() && a_file.is_open() && x_file.is_open() && w_file.is_open()) {
 		string line, tmp;
 		// parsing matrix information
@@ -61,6 +64,7 @@ int main(int argc, char** argv) {
 
 		int idx = 0;
 		int limit_idx;
+		start = time(NULL);
 		while (idx < x_h) {
 			if (idx + MAX_IDX < x_h)
 				limit_idx = idx + MAX_IDX;
@@ -91,6 +95,8 @@ int main(int argc, char** argv) {
 			idx = limit_idx;
 		}
 		xw_file.close();
+		end = time(NULL);
+		cout<<"Combination running time: "<<end-start<<"sec"<<endl;
 
 		getline(a_file, line);
 		stringstream ss(line);
@@ -106,11 +112,12 @@ int main(int argc, char** argv) {
 		ss.str(line);
 		for (int i = 0; i < max_col; i++) {
 			getline(ss, tmp, ' ');
-			a_col.push_back(stoi(tmp))
+			a_col.push_back(stoi(tmp));
 		}
 
 		// aggregation
 		idx = 0;
+		start = time(NULL);
 		while (idx < a_h) {
 			if (idx + MAX_IDX < a_h)
 				limit_idx = idx + MAX_IDX;
@@ -130,7 +137,11 @@ int main(int argc, char** argv) {
 			idx = limit_idx;
 		}
 		axw_file.close();
+		end = time(NULL);
+		cout<<"Aggregation running time: "<<end-start<<"sec"<<endl;
 	}
+
+	return 0;
 }
 
 // this is combination function
@@ -173,8 +184,5 @@ void Aggregation(int h) {
 	accum_edge = a_row[h];
 	for (int i = 0; i < h; i++) {
 		a_row.erase(a_row.begin());
-	}
-	for (int i = 0; i < accum_edge; i++) {
-		a_col.erase(a_col.begin());
 	}
 }
