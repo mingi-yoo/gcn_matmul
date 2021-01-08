@@ -2,15 +2,15 @@
 
 using namespace std;
 
-uint64_t X[MAX_DIM];
-uint64_t W[MAX_DIM];
-uint64_t XW[MAX_DIM];
-uint64_t a_h, a_w, x_h, x_w, w_h, w_w;
+int X[MAX_DIM];
+int W[MAX_DIM];
+int XW[MAX_DIM];
+int a_h, a_w, x_h, x_w, w_h, w_w;
 
-vector<uint64_t> a_row;
-vector<uint64_t> a_col;
-vector<vector<uint64_t>> xw_row;
-vector<vector<uint64_t>> axw_row;
+vector<int> a_row;
+vector<int> a_col;
+vector<vector<int>> xw_row;
+vector<vector<int>> axw_row;
 
 void Combination(int h);
 void Aggregation(int h);
@@ -32,35 +32,35 @@ int main(int argc, char** argv) {
 		for (int i = 0; i < 6; i++) {
 			getline(ini_file, line);
 			if (i == 0)
-				a_h = stoull(line);
+				a_h = stoi(line);
 			else if (i == 1)
-				a_w = stoull(line);
+				a_w = stoi(line);
 			else if (i == 2)
-				x_h = stoull(line);
+				x_h = stoi(line);
 			else if (i == 3)
-				x_w = stoull(line);
+				x_w = stoi(line);
 			else if (i == 4)
-				w_h = stoull(line);
+				w_h = stoi(line);
 			else
-				w_w = stoull(line);
+				w_w = stoi(line);
 		}
 
 		for (int i = 0; i < x_h; i++) 
-			xw_row.push_back(vector<uint64_t> ());
+			xw_row.push_back(vector<int> ());
 		for (int i = 0; i < MAX_IDX; i++)
-			axw_row.push_back(vector<uint64_t> ());
+			axw_row.push_back(vector<int> ());
 		// parsing weight matrix
 		for (int i = 0; i < w_h; i++) {
 			getline(w_file, line);
 			stringstream ss(line);
 			for (int j = 0; j < w_w; j++) {
 				getline(ss, tmp, ' ');
-				W[j * w_h + i] = stoull(tmp);
+				W[j * w_h + i] = stoi(tmp);
 			}
 		}
 
-		uint64_t idx = 0;
-		uint64_t limit_idx;
+		int idx = 0;
+		int limit_idx;
 		while (idx < x_h) {
 			if (idx + MAX_IDX < x_h)
 				limit_idx = idx + MAX_IDX;
@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
 				stringstream ss(line);
 				for (int j = 0; j < x_w; j++) {
 					getline(ss, tmp, ' ');
-					X[i * x_w + j] = stoull(tmp);
+					X[i * x_w + j] = stoi(tmp);
 				}
 			}
 			// return matrix multiplication result
@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
 		while (getline(ss, tmp, ' ')) {
 			if (tmp == "\n")
 				break;
-			a_row.push_back(stoull(tmp));
+			a_row.push_back(stoi(tmp));
 		}
 		uint max_col = a_row.back();
 
@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
 		ss.str(line);
 		for (int i = 0; i < max_col; i++) {
 			getline(ss, tmp, ' ');
-			a_col.push_back(stoull(tmp))
+			a_col.push_back(stoi(tmp))
 		}
 
 		// aggregation
@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
 
 // this is combination function
 void Combination(int h) {
-	uint64_t total;
+	int total;
 
 	#pragma omp parallel for private(total) schedule(static) num_threads(16)
 	for (int i = 0; i < h; i ++) {
@@ -150,15 +150,15 @@ void Combination(int h) {
 
 // this is aggregation function
 void Aggregation(int h) {
-	uint64_t max_edge;
-	uint64_t accum_edge;
+	int max_edge;
+	int accum_edge;
 
 	#pragma omp parallel for private(max_edge, accum_edge) schedule(static) num_threads(16)
-	for (uint64_t i = 0; i < h; i++) {
+	for (int i = 0; i < h; i++) {
 		max_edge = a_row[i+1] - a_row[i];
 		accum_edge = a_row[i];
 		for (int j = 0; j < max_edge; j++) {
-			uint64_t e = a_col[accum_edge + j];
+			int e = a_col[accum_edge + j];
 			if (j == 0) {
 				for (int k = 0; k < x_w; k++)
 					axw_row[i].push_back(xw_row[e][k]);
@@ -171,10 +171,10 @@ void Aggregation(int h) {
 	}
 
 	accum_edge = a_row[h];
-	for (uint64_t i = 0; i < h; i++) {
+	for (int i = 0; i < h; i++) {
 		a_row.erase(a_row.begin());
 	}
-	for (uint64_t i = 0; i < accum_edge; i++) {
+	for (int i = 0; i < accum_edge; i++) {
 		a_col.erase(a_col.begin());
 	}
 }
